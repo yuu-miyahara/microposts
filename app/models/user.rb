@@ -11,6 +11,21 @@ class User < ApplicationRecord
   has_many :followings, through: :relationships, source: :follow
   has_many :reverses_of_relationship, class_name: 'Relationship', foreign_key: 'follow_id'
   has_many :followers, through: :reverses_of_relationship, source: :user
+  has_many :favolites
+  has_many :favolite_microposts, through: :favolites, source: :micropost
+  
+  def favolite(favolite_micropost)
+    self.favolites.find_or_create_by(micropost_id: favolite_micropost.id)
+  end
+  
+  def release_favolite(favolite_micropost)
+    favolite = self.favolites.find_by(micropost_id: favolite_micropost)
+    favolite.destroy if favolite
+  end
+  
+  def favolite?(micropost)
+    self.favolite_microposts.include?(micropost)
+  end
   
   def follow(other_user)
     unless self == other_user
